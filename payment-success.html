@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lace V — Access unlocked</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F5F1E8; --accent: #6B1A2A; --ink: #1a0a0a; --mid: #5a4a3a;
+    --muted: #7a6a5a; --faint: #9a7a6a; --border: #d4c4b4; --white: #ffffff;
+    --font: 'Inter', sans-serif;
+  }
+  body { background: var(--bg); font-family: var(--font); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+  a { text-decoration: none; color: inherit; }
+
+  nav { padding: 1.25rem 2.5rem; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+  .logo { display: flex; align-items: center; gap: 1rem; }
+  .logo-text p:first-child { font-size: 17px; font-weight: 500; letter-spacing: 0.16em; color: var(--accent); }
+  .logo-text p:last-child { font-size: 9px; letter-spacing: 0.2em; color: var(--faint); text-transform: uppercase; }
+
+  .main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+  .card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2.5rem 2.25rem;
+    max-width: 420px; width: 100%; text-align: center;
+  }
+  .check-mark {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #e8f0e4; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 1.5rem;
+  }
+  .check-mark svg { width: 26px; height: 26px; }
+  .card-kicker { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); font-weight: 600; margin: 0 0 0.6rem; }
+  .card h1 { font-size: 22px; font-weight: 500; color: var(--ink); margin: 0 0 0.75rem; line-height: 1.3; }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.7; margin: 0 0 1.75rem; }
+  .btn-primary {
+    display: inline-block; background: var(--accent); color: var(--bg);
+    border-radius: 8px; padding: 0.8rem 2rem; font-size: 14px;
+    font-weight: 500; transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .redirect-note { font-size: 12px; color: var(--faint); margin-top: 1rem; }
+
+  footer { border-top: 1px solid var(--border); padding: 1.5rem 2.5rem; }
+  footer p { font-size: 12px; color: var(--faint); }
+
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.25rem; }
+    .main { padding: 2rem 1.25rem; align-items: flex-start; padding-top: 3rem; }
+    footer { padding: 1.5rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <svg width="44" height="37" viewBox="0 0 160 140">
+      <polyline points="0,0 80,150 160,0" fill="none" stroke="#6B1A2A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.2"/>
+      <polyline points="22,0 80,103 138,0" fill="none" stroke="#6B1A2A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+      <polyline points="50,0 80,56 110,0" fill="none" stroke="#6B1A2A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+    </svg>
+    <div class="logo-text">
+      <p>LACE V</p>
+      <p>Pattern Reading Machine</p>
+    </div>
+  </a>
+</nav>
+
+<div class="main">
+  <div class="card">
+    <div class="check-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3a6b2a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <p class="card-kicker">Subscription active</p>
+    <h1>Export and reports unlocked.</h1>
+    <p>Your subscription is active. You can now export your pattern map and download reports from any Lace V tool. This device is now unlocked for 30 days.</p>
+    <a class="btn-primary" href="domains.html">Go to your tools</a>
+    <p class="redirect-note" id="redirect-note"></p>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Lace V</p>
+</footer>
+
+<script>
+  // Set the access token in localStorage
+  const STORAGE_KEY = 'lacev_access_token';
+  const expires = Date.now() + (30 * 24 * 60 * 60 * 1000);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ granted: true, expires }));
+
+  // Auto-redirect to domains after 4 seconds
+  let countdown = 4;
+  const note = document.getElementById('redirect-note');
+  note.textContent = `Taking you to your tools in ${countdown}…`;
+  const timer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(timer);
+      window.location.href = 'domains.html';
+    } else {
+      note.textContent = `Taking you to your tools in ${countdown}…`;
+    }
+  }, 1000);
+</script>
+
+</body>
+</html>
