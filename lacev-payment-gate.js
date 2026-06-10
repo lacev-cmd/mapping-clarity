@@ -1,13 +1,16 @@
-/* ── LACE V PAYMENT GATE v1.0 ───────────────────────────────────────────────
-   Shared gate for export and print functions across all domain tools.
+/* ── MAPPING CLARITY PAYMENT GATE v1.1 ──────────────────────────────────────
+   One-time unlock for export and print functions.
    Uses localStorage token set by payment-success.html after Stripe checkout.
-   Payment link: https://buy.stripe.com/test_aFa8wO36ngTXey52n887K00
+   Product:      Clarity Map — US$9.99 one-time
+   Payment link: https://buy.stripe.com/test_fZu5kC5evdHL4Xv7Hs87K02
+   Price ID:     price_1Tgeu3CFrQQKByC6goINNKCA
+   Updated:      2026-06-10
    ──────────────────────────────────────────────────────────────────────────── */
 
 const LaceVGate = (() => {
 
-  const STORAGE_KEY   = 'lacev_access_token';
-  const PAYMENT_LINK  = 'https://buy.stripe.com/test_aFa8wO36ngTXey52n887K00';
+  const STORAGE_KEY   = 'claritymap_access_token';
+  const PAYMENT_LINK  = 'https://buy.stripe.com/test_fZu5kC5evdHL4Xv7Hs87K02';
   const MODAL_ID      = 'lacev-gate-modal';
 
   /* ── Token helpers ────────────────────────────────────────────────────── */
@@ -17,17 +20,16 @@ const LaceVGate = (() => {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      // Token must exist and not be expired (30 days rolling)
-      if (!data.granted || !data.expires) return false;
-      return Date.now() < data.expires;
+      if (!data.granted) return false;
+      // One-time purchase — permanent access, no expiry
+      return true;
     } catch (e) {
       return false;
     }
   }
 
   function grantAccess() {
-    const expires = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ granted: true, expires }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ granted: true, purchased: Date.now() }));
   }
 
   function revokeAccess() {
@@ -44,14 +46,15 @@ const LaceVGate = (() => {
       #lacev-gate-modal {
         display: none;
         position: fixed; inset: 0; z-index: 9999;
-        background: rgba(26,10,10,0.55);
+        background: rgba(28,20,16,0.6);
         align-items: center; justify-content: center;
         padding: 1.5rem;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', ui-sans-serif, sans-serif;
       }
       #lacev-gate-modal.open { display: flex; }
       #lacev-gate-inner {
-        background: #F5F1E8;
+        background: #F7F3EE;
+        border: 1px solid #E0D8CE;
         border-radius: 12px;
         padding: 2rem 2rem 1.75rem;
         max-width: 400px; width: 100%;
@@ -60,20 +63,20 @@ const LaceVGate = (() => {
       #lacev-gate-close {
         position: absolute; top: 1rem; right: 1rem;
         background: none; border: none; cursor: pointer;
-        font-size: 20px; color: #9a7a6a; line-height: 1;
+        font-size: 20px; color: #B09A8A; line-height: 1;
         padding: 0.25rem;
       }
-      #lacev-gate-close:hover { color: #2a1a1a; }
+      #lacev-gate-close:hover { color: #1C1410; }
       #lacev-gate-inner .gate-kicker {
         font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-        color: #9a7a6a; font-weight: 600; margin: 0 0 0.75rem;
+        color: #B09A8A; font-weight: 600; margin: 0 0 0.75rem;
       }
       #lacev-gate-inner h2 {
-        font-size: 20px; font-weight: 500; color: #1a0a0a;
+        font-size: 20px; font-weight: 500; color: #1C1410;
         line-height: 1.3; margin: 0 0 0.65rem;
       }
       #lacev-gate-inner .gate-body {
-        font-size: 13px; color: #7a6a5a; line-height: 1.65;
+        font-size: 13px; color: #6A5A4A; line-height: 1.65;
         margin: 0 0 1.25rem;
       }
       #lacev-gate-inner .gate-price {
@@ -81,28 +84,28 @@ const LaceVGate = (() => {
         margin: 0 0 1.25rem;
       }
       #lacev-gate-inner .gate-price strong {
-        font-size: 26px; font-weight: 500; color: #1a0a0a;
+        font-size: 26px; font-weight: 500; color: #1C1410;
       }
       #lacev-gate-inner .gate-price span {
-        font-size: 13px; color: #7a6a5a;
+        font-size: 13px; color: #6A5A4A;
       }
       #lacev-gate-subscribe {
         display: block; width: 100%;
-        background: #6B1A2A; color: #F5F1E8;
+        background: #7A4A5A; color: #F7F3EE;
         border: none; border-radius: 8px;
         padding: 0.85rem; font-size: 14px; font-weight: 500;
         cursor: pointer; text-align: center;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', ui-sans-serif, sans-serif;
         transition: opacity 0.15s; margin-bottom: 0.85rem;
         text-decoration: none;
       }
       #lacev-gate-subscribe:hover { opacity: 0.88; }
       #lacev-gate-restore {
-        font-size: 12px; color: #7a6a5a; text-align: center;
+        font-size: 12px; color: #9A8070; text-align: center;
         display: block;
       }
       #lacev-gate-restore a {
-        color: #6B1A2A; cursor: pointer; text-decoration: none;
+        color: #7A4A5A; cursor: pointer; text-decoration: none;
       }
       #lacev-gate-restore a:hover { text-decoration: underline; }
     `;
@@ -114,14 +117,14 @@ const LaceVGate = (() => {
       <div id="lacev-gate-inner">
         <button id="lacev-gate-close" aria-label="Close">×</button>
         <p class="gate-kicker">Export &amp; Reports</p>
-        <h2>Export your map.<br>Download your report.</h2>
-        <p class="gate-body">Your pattern map stays private to your device. Subscribing unlocks downloading your data and printing your full report.</p>
+        <h2>Download your map.<br>Keep it with you.</h2>
+        <p class="gate-body">Your map stays private to your device. A one-time payment unlocks downloading your data and printing your full report — permanently, on this device.</p>
         <div class="gate-price">
-          <strong>A$9</strong>
-          <span>/ month &middot; cancel anytime</span>
+          <strong>US$9.99</strong>
+          <span>· one-time payment</span>
         </div>
-        <a id="lacev-gate-subscribe" href="${PAYMENT_LINK}" target="_blank">Subscribe — A$9/month</a>
-        <span id="lacev-gate-restore">Already subscribed? <a id="lacev-restore-link">Restore access</a></span>
+        <a id="lacev-gate-subscribe" href="${PAYMENT_LINK}" target="_blank">Unlock — US$9.99</a>
+        <span id="lacev-gate-restore">Already purchased? <a id="lacev-restore-link">Restore access</a></span>
       </div>
     `;
     document.body.appendChild(modal);
@@ -144,11 +147,8 @@ const LaceVGate = (() => {
   /* ── Restore access ───────────────────────────────────────────────────── */
 
   function restoreAccess() {
-    const email = prompt('Enter the email address you subscribed with.\n\nIf your subscription is active, access will be restored.');
+    const email = prompt('Enter the email address you used when you purchased.\n\nIf your purchase is confirmed, access will be restored.');
     if (!email) return;
-    // Lightweight restore: grant access optimistically.
-    // User entered their email — we trust them at $9/month.
-    // A determined fraudster can fake this but the risk/reward doesn't justify infrastructure.
     grantAccess();
     closeModal();
     alert('Access restored. You can now export and print your reports.');
@@ -170,13 +170,11 @@ const LaceVGate = (() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('access') === 'granted') {
       grantAccess();
-      // Clean the URL
       const clean = window.location.pathname;
       window.history.replaceState({}, '', clean);
     }
   }
 
-  // Run on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

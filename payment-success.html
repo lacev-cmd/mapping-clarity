@@ -90,21 +90,20 @@
 
 <script>
   // Set the access token in localStorage
-  const STORAGE_KEY = 'lacev_access_token';
-  const expires = Date.now() + (30 * 24 * 60 * 60 * 1000);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ granted: true, expires }));
+  const STORAGE_KEY = 'claritymap_access_token';
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ granted: true, purchased: Date.now() }));
 
-  // Auto-redirect to domains after 4 seconds
+  // Auto-redirect to tool after 4 seconds
   let countdown = 4;
   const note = document.getElementById('redirect-note');
-  note.textContent = `Taking you to your tools in ${countdown}…`;
+  note.textContent = `Taking you to your map in ${countdown}…`;
   const timer = setInterval(() => {
     countdown--;
     if (countdown <= 0) {
       clearInterval(timer);
-      window.location.href = 'domains.html';
+      window.location.href = 'tool.html';
     } else {
-      note.textContent = `Taking you to your tools in ${countdown}…`;
+      note.textContent = `Taking you to your map in ${countdown}…`;
     }
   }, 1000);
 </script>
