@@ -4,39 +4,56 @@
    Product:      Clarity Map — US$9.99 one-time
    Payment link: https://buy.stripe.com/test_fZu5kC5evdHL4Xv7Hs87K02
    Price ID:     price_1Tgeu3CFrQQKByC6goINNKCA
-   Updated:      2026-06-11
+   Updated:      2026-06-12
    ──────────────────────────────────────────────────────────────────────────── */
 
 const LaceVGate = (() => {
 
-  const STORE_KEY    = 'claritymap_access_token';
+  const STORAGE_KEY  = 'claritymap_access_token';
   const PAYMENT_LINK = 'https://buy.stripe.com/test_fZu5kC5evdHL4Xv7Hs87K02';
   const BACKEND      = 'https://lacev-backend-production.up.railway.app';
   const MODAL_ID     = 'lacev-gate-modal';
 
-  /* ── Token verification (server-side) ────────────────────────────────── */
+  /* ── Token helpers ────────────────────────────────────────────────────── */
 
-  async function hasAccess() {
+  function getToken() {
     try {
-      const token = localStorage.getItem(STORE_KEY);
-      if (!token) return false;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      return data.token || null;
+    } catch (e) {
+      return null;
+    }
+  }
 
-      const res = await fetch(`${BACKEND}/token/verify`, {
+  function storeToken(token) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, granted: true, purchased: Date.now() }));
+  }
+
+  function revokeAccess() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  async function verifyToken(token) {
+    try {
+      const res = await fetch(BACKEND + '/token/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token })
       });
-
       if (!res.ok) return false;
       const data = await res.json();
-      return data.valid === true;
+      return !!data.valid;
     } catch (e) {
       return false;
     }
   }
 
-  function revokeAccess() {
-    localStorage.removeItem(STORE_KEY);
+  async function hasAccess() {
+    const token = getToken();
+    if (!token) return false;
+    return await verifyToken(token);
   }
 
   /* ── Modal ────────────────────────────────────────────────────────────── */
@@ -107,10 +124,6 @@ const LaceVGate = (() => {
         font-size: 12px; color: #9A8070; text-align: center;
         display: block;
       }
-      #lacev-gate-restore a {
-        color: #7A4A5A; cursor: pointer; text-decoration: none;
-      }
-      #lacev-gate-restore a:hover { text-decoration: underline; }
     `;
     document.head.appendChild(style);
 
@@ -126,15 +139,14 @@ const LaceVGate = (() => {
           <strong>US$9.99</strong>
           <span>· one-time payment</span>
         </div>
-        <a id="lacev-gate-subscribe" href="${PAYMENT_LINK}">Unlock — US$9.99</a>
-        <span id="lacev-gate-restore">Already purchased? <a id="lacev-restore-link">Restore access</a></span>
+        <a id="lacev-gate-subscribe" href="${PAYMENT_LINK}" target="_blank">Unlock — US$9.99</a>
+        <span id="lacev-gate-restore">Already purchased? Use the link from your confirmation email to restore access on this device.</span>
       </div>
     `;
     document.body.appendChild(modal);
 
     document.getElementById('lacev-gate-close').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-    document.getElementById('lacev-restore-link').addEventListener('click', restoreAccess);
   }
 
   function openModal() {
@@ -147,26 +159,16 @@ const LaceVGate = (() => {
     if (m) m.classList.remove('open');
   }
 
-  /* ── Restore access ───────────────────────────────────────────────────── */
-  // No server-side restore endpoint exists yet.
-  // Direct user to re-complete payment via the payment link.
-
-  function restoreAccess() {
-    closeModal();
-    alert('To restore access, please complete the purchase again using the same device. If you believe this is an error, contact support.');
-  }
-
-  /* ── Public gate function (async) ────────────────────────────────────── */
+  /* ── Public gate function ─────────────────────────────────────────────── */
 
   async function check(onGranted) {
-    const granted = await hasAccess();
-    if (granted) {
+    if (await hasAccess()) {
       onGranted();
     } else {
       openModal();
     }
   }
 
-  return { check, hasAccess, revokeAccess };
+  return { check, hasAccess, getToken, storeToken, revokeAccess };
 
 })();

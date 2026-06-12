@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clarity Map — Access unlocked</title>
+<title>Lace V — Access unlocked</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #F5F1E8; --accent: #7A4A5A; --ink: #1C1410; --mid: #6A5A4A;
-    --muted: #9A8070; --faint: #B09A8A; --border: #E0D8CE; --white: #ffffff;
+    --bg: #F5F1E8; --accent: #6B1A2A; --ink: #1a0a0a; --mid: #5a4a3a;
+    --muted: #7a6a5a; --faint: #9a7a6a; --border: #d4c4b4; --white: #ffffff;
     --font: 'Inter', sans-serif;
   }
   body { background: var(--bg); font-family: var(--font); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
@@ -31,18 +31,28 @@
     background: #e8f0e4; display: flex; align-items: center;
     justify-content: center; margin: 0 auto 1.5rem;
   }
+  .check-mark.error { background: #f5e4e2; }
   .check-mark svg { width: 26px; height: 26px; }
   .card-kicker { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); font-weight: 600; margin: 0 0 0.6rem; }
   .card h1 { font-size: 22px; font-weight: 500; color: var(--ink); margin: 0 0 0.75rem; line-height: 1.3; }
-  .card p { font-size: 14px; color: var(--mid); line-height: 1.7; margin: 0 0 1.75rem; }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.7; margin: 0 0 1.75rem; }
   .btn-primary {
     display: inline-block; background: var(--accent); color: var(--bg);
     border-radius: 8px; padding: 0.8rem 2rem; font-size: 14px;
-    font-weight: 500; transition: opacity 0.15s;
+    font-weight: 500; transition: opacity 0.15s; border: none; cursor: pointer;
   }
   .btn-primary:hover { opacity: 0.88; }
-  .redirect-note { font-size: 12px; color: var(--faint); margin-top: 1rem; margin-bottom: 0; }
-  .error-note { font-size: 13px; color: #c0504a; margin-top: 1rem; display: none; }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
+  .redirect-note { font-size: 12px; color: var(--faint); margin-top: 1rem; }
+
+  .spinner {
+    width: 26px; height: 26px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   footer { border-top: 1px solid var(--border); padding: 1.5rem 2.5rem; }
   footer p { font-size: 12px; color: var(--faint); }
@@ -59,12 +69,12 @@
 <nav>
   <a class="logo" href="index.html">
     <svg width="44" height="37" viewBox="0 0 160 140">
-      <polyline points="0,0 80,150 160,0" fill="none" stroke="#7A4A5A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.2"/>
-      <polyline points="22,0 80,103 138,0" fill="none" stroke="#7A4A5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
-      <polyline points="50,0 80,56 110,0" fill="none" stroke="#7A4A5A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+      <polyline points="0,0 80,150 160,0" fill="none" stroke="#6B1A2A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.2"/>
+      <polyline points="22,0 80,103 138,0" fill="none" stroke="#6B1A2A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+      <polyline points="50,0 80,56 110,0" fill="none" stroke="#6B1A2A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
     </svg>
     <div class="logo-text">
-      <p>CLARITY MAP</p>
+      <p>LACE V</p>
       <p>Pattern Reading Machine</p>
     </div>
   </a>
@@ -72,17 +82,42 @@
 
 <div class="main">
   <div class="card">
-    <div class="check-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#3a6b2a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
+
+    <!-- State: verifying -->
+    <div id="state-verifying">
+      <div class="check-mark"><div class="spinner"></div></div>
+      <p class="card-kicker">Confirming purchase</p>
+      <h1>Verifying your payment…</h1>
+      <p>This usually takes a couple of seconds.</p>
     </div>
-    <p class="card-kicker">Payment confirmed</p>
-    <h1>Export and reports unlocked.</h1>
-    <p>Your purchase is verified. You can now export your clarity map and download your full report on this device.</p>
-    <a class="btn-primary" href="tool.html">Return to Clarity Map</a>
-    <p class="redirect-note" id="redirect-note">Verifying your payment…</p>
-    <p class="error-note" id="error-note"></p>
+
+    <!-- State: success -->
+    <div id="state-success" style="display:none">
+      <div class="check-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3a6b2a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <p class="card-kicker">Purchase confirmed</p>
+      <h1>Export and reports unlocked.</h1>
+      <p>You can now export your pattern map and download reports. This device is unlocked.</p>
+      <a class="btn-primary" href="tool.html">Go to your map</a>
+      <p class="redirect-note" id="redirect-note"></p>
+    </div>
+
+    <!-- State: error -->
+    <div id="state-error" style="display:none">
+      <div class="check-mark error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#aa2a2a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+      <p class="card-kicker">Something went wrong</p>
+      <h1>We couldn't confirm that purchase.</h1>
+      <p id="error-detail">If you completed checkout, please retry — or contact support if this continues.</p>
+      <button class="btn-primary" onclick="attemptClaim()">Retry</button>
+    </div>
+
   </div>
 </div>
 
@@ -91,59 +126,81 @@
 </footer>
 
 <script>
-  const BACKEND   = 'https://lacev-backend-production.up.railway.app';
-  const STORE_KEY = 'claritymap_access_token';
-  const REDIRECT  = 'tool.html';
+  const STORAGE_KEY = 'claritymap_access_token';
+  const BACKEND = 'https://lacev-backend-production.up.railway.app';
 
-  async function claimToken() {
-    const params     = new URLSearchParams(window.location.search);
-    const sessionId  = params.get('session_id');
-    const note       = document.getElementById('redirect-note');
-    const errorNote  = document.getElementById('error-note');
+  const elVerifying = document.getElementById('state-verifying');
+  const elSuccess   = document.getElementById('state-success');
+  const elError     = document.getElementById('state-error');
+  const errorDetail = document.getElementById('error-detail');
+
+  function showState(state) {
+    elVerifying.style.display = state === 'verifying' ? 'block' : 'none';
+    elSuccess.style.display   = state === 'success'   ? 'block' : 'none';
+    elError.style.display     = state === 'error'     ? 'block' : 'none';
+  }
+
+  async function attemptClaim() {
+    showState('verifying');
+
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
 
     if (!sessionId) {
-      note.style.display = 'none';
-      errorNote.style.display = 'block';
-      errorNote.textContent = 'No session ID found. If you completed payment, please contact support.';
+      errorDetail.textContent = 'No checkout session was found in this link. If you completed a purchase, please use the link from your confirmation email.';
+      showState('error');
       return;
     }
 
     try {
-      const res = await fetch(`${BACKEND}/token/claim`, {
+      const res = await fetch(BACKEND + '/token/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId })
       });
 
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        errorDetail.textContent = data.detail || 'Your payment could not be confirmed yet. Please retry in a moment.';
+        showState('error');
+        return;
+      }
 
       const data = await res.json();
-      if (!data.token) throw new Error('No token in response');
+      if (!data.token) {
+        errorDetail.textContent = 'No access token was returned. Please retry or contact support.';
+        showState('error');
+        return;
+      }
 
-      localStorage.setItem(STORE_KEY, data.token);
-      window.history.replaceState({}, '', window.location.pathname);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        token: data.token,
+        granted: true,
+        purchased: Date.now()
+      }));
+
+      showState('success');
 
       let countdown = 4;
+      const note = document.getElementById('redirect-note');
       note.textContent = `Taking you to your map in ${countdown}…`;
       const timer = setInterval(() => {
         countdown--;
         if (countdown <= 0) {
           clearInterval(timer);
-          window.location.href = REDIRECT;
+          window.location.href = 'tool.html';
         } else {
           note.textContent = `Taking you to your map in ${countdown}…`;
         }
       }, 1000);
 
-    } catch (err) {
-      note.style.display = 'none';
-      errorNote.style.display = 'block';
-      errorNote.textContent = 'We could not verify your payment right now. Please try refreshing, or contact support if the problem continues.';
-      console.error('Token claim error:', err);
+    } catch (e) {
+      errorDetail.textContent = 'Could not reach the verification service. Check your connection and retry.';
+      showState('error');
     }
   }
 
-  claimToken();
+  attemptClaim();
 </script>
 
 </body>
